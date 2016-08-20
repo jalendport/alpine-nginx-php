@@ -4,3 +4,4 @@ web:
     - 80:80
   volumes:
     - ./log:/var/log
+    - ./public:/app/public
