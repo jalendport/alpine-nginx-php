@@ -22,6 +22,7 @@ RUN apk add --update --no-cache \
     php7-session \
     php7-dom \
     php7-zlib \
+    php7-mbstring \
     php7-mcrypt \
     php7-openssl \
     php7-xml \
@@ -31,6 +32,7 @@ RUN apk add --update --no-cache \
     php7-pdo \
     php7-pdo_mysql \
     php7-iconv \
+    php7-curl \
     php7-phar \
     php7-dom && \
     rm -rf /var/cache/apk/*
