@@ -1,7 +1,22 @@
-web:
-  build: .
-  ports:
-    - 80:80
-  volumes:
-    - ./log:/var/log
-    - ./public:/app/public
+version: '2'
+
+services:
+  db:
+    image: mariadb:latest
+    volumes:
+      - ./.data/db:/var/lib/mysql
+    restart: always
+    env_file: .env
+
+  web:
+    build: .
+    depends_on:
+      - db
+    links:
+      - db
+    ports:
+      - 80:80
+    env_file: .env
+    volumes:
+      - ./log:/var/log
+      - ./log/craft:/app/craft/storage/runtime/logs
