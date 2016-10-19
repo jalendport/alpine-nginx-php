@@ -39,9 +39,8 @@ RUN apk add --update --no-cache \
 
 RUN curl -sS https://getcomposer.org/installer | php7 -- --install-dir=/usr/bin --filename=composer
 
-COPY ./nginx.conf /etc/nginx/nginx.conf
-COPY ./default.conf /etc/nginx/conf.d/
-COPY ./supervisord.conf /etc/supervisord.conf
+COPY ./config/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./config/nginx/default.conf /etc/nginx/conf.d/
 
 # tweak nginx config
 RUN sed -i -e "s@}@application/x-font-ttf ttf; font/opentype otf; application/vnd.ms-fontobject eot; font/x-woff woff;}@g" /etc/nginx/mime.types
@@ -73,11 +72,33 @@ RUN sed -i -e "s/user = nobody/user = nginx/g" /etc/php7/php-fpm.d/www.conf && \
 
 # setup nginx public dir
 RUN mkdir -p /app/public
-ADD public/index.php /app/public/index.php
+
+WORKDIR /app/
+
+# Download the latest Craft, save as craft.zip in current folder
+RUN wget 'https://craftcms.com/latest.zip?accept_license=yes' -O "/app/craft.zip"
+
+# Extract just the craft directory and index out of the archive, quietly
+RUN unzip -qqo /app/craft.zip 'craft/*' 'public/index.php'
+
+# cleanup
+RUN rm /app/craft.zip
+
+# remove default template files
+RUN rm -rf /app/craft/templates/*
+
+# create craftversion.txt
+RUN echo $(egrep '(CRAFT_VERSION|CRAFT_BUILD)' /app/craft/app/Info.php | awk '{print $2}' | sed s@[^0-9\.]@@g) | tee public/craftversion.txt
+
+# add default config
+ADD ./config/craft/db.php /app/craft/config/db.php
+ADD ./config/craft/general.php /app/craft/config/general.php
 
 # Start Supervisord
-ADD ./start.sh /start.sh
+COPY ./config/app/supervisord.conf /etc/supervisord.conf
+COPY ./config/app/start.sh /start.sh
 RUN chmod 755 /start.sh
+
 # Expose Ports
 EXPOSE 443 80
 
