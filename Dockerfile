@@ -73,7 +73,7 @@ RUN sed -i -e "s/user = nobody/user = nginx/g" /etc/php7/php-fpm.d/www.conf && \
 
 # setup nginx public dir
 RUN mkdir -p /app/public
-ADD index.php /app/public/index.php
+ADD public/index.php /app/public/index.php
 
 # Start Supervisord
 ADD ./start.sh /start.sh
